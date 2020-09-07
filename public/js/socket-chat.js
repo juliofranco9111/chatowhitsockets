@@ -2,56 +2,57 @@ var socket = io();
 
 var params = new URLSearchParams(window.location.search);
 
-if (!params.has('nombre')||!params.has('sala')) {
+if (!params.has('nombre') || !params.has('sala')) {
     window.location = 'index.html';
-    throw new Error('El nombre y la sala son obligatorios');
-};
+    throw new Error('El nombre y sala son necesarios');
+}
 
 var usuario = {
     nombre: params.get('nombre'),
     sala: params.get('sala')
 };
 
-socket.on('connect', function () {
+
+
+socket.on('connect', function() {
     console.log('Conectado al servidor');
-    socket.emit('entrarChat', usuario,function(respuesta){
-        console.log('Usuarios conectados: ',respuesta);
+
+    socket.emit('entrarChat', usuario, function(resp) {
+        //console.log('Usuarios conectados', resp);
+        renderizarUsuarios(resp);
     });
 
-
 });
 
+// escuchar
+socket.on('disconnect', function() {
 
-socket.on('disconnect', function () {
-
-    console.log('Se perdió la conexión con el servidor');
+    console.log('Perdimos conexión con el servidor');
 
 });
-
-//Enviar informacion
-/* socket.emit('crearMensaje',function(){
-
-}) */
 
 
 
 // Escuchar información
-socket.on('crearMensaje', function (respuesta) {
-
-    console.log('Servidor:', respuesta);
-
+socket.on('crearMensaje', function(mensaje) {
+    //console.log('Servidor:', mensaje);
+    renderizarMensajes(mensaje, false);
+    
+    var audio = new Audio('../audio/1.mp3');
+        
+    audio.play();
+    scrollBottom();
 });
 
-//Escuchar cambios de usuarios
-//Cuando entran o salen
-
-socket.on('listaPersonas', function (personasPorSala) {
-
-    console.log(personasPorSala);
-
+// Escuchar cambios de usuarios
+// cuando un usuario entra o sale del chat
+socket.on('listaPersonas', function(personas) {
+    renderizarUsuarios(personas);
 });
 
-//Mensajes privados
-socket.on('mensajePrivado',function(mensaje){
-    console.log('Mensaje privado: ', mensaje)
-})
+// Mensajes privados
+socket.on('mensajePrivado', function(mensaje) {
+
+    //console.log('Mensaje Privado:', mensaje);
+
+});
